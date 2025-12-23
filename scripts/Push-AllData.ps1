@@ -38,7 +38,8 @@ Write-Host "============================================" -ForegroundColor Cyan
 # Push Backup Data
 Write-Host "`n[1/2] Pushing Backup Data..." -ForegroundColor Yellow
 
-if (Test-Path $BackupCsvPath) {
+# Use LiteralPath for special characters like []
+if (Test-Path -LiteralPath $BackupCsvPath) {
     try {
         & "$scriptDir\Push-BackupData.ps1" -CsvPath $BackupCsvPath -ApiUrl $ApiUrl -ServiceKey $ServiceKey -Delimiter $Delimiter
         if ($LASTEXITCODE -ne 0) {
@@ -61,7 +62,8 @@ else {
 # Push VM Data
 Write-Host "`n[2/2] Pushing VM Failover Data..." -ForegroundColor Yellow
 
-if (Test-Path $VMCsvPath) {
+# Use LiteralPath for special characters like []
+if (Test-Path -LiteralPath $VMCsvPath) {
     try {
         & "$scriptDir\Push-VMData.ps1" -CsvPath $VMCsvPath -ApiUrl $ApiUrl -ServiceKey $ServiceKey -Delimiter $Delimiter
         if ($LASTEXITCODE -ne 0) {

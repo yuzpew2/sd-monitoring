@@ -9,21 +9,21 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$CsvPath,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$ApiUrl,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$ServiceKey,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$Delimiter = ";"
 )
 
-# Validate CSV file exists
-if (-not (Test-Path $CsvPath)) {
+# Validate CSV file exists (use LiteralPath for special characters like [])
+if (-not (Test-Path -LiteralPath $CsvPath)) {
     Write-Error "CSV file not found: $CsvPath"
     exit 1
 }
@@ -31,8 +31,8 @@ if (-not (Test-Path $CsvPath)) {
 Write-Host "Reading CSV file: $CsvPath" -ForegroundColor Cyan
 
 try {
-    # Import CSV with semicolon delimiter
-    $csvData = Import-Csv -Path $CsvPath -Delimiter $Delimiter
+    # Import CSV with semicolon delimiter (use LiteralPath for special characters)
+    $csvData = Import-Csv -LiteralPath $CsvPath -Delimiter $Delimiter
     
     if ($csvData.Count -eq 0) {
         Write-Warning "CSV file is empty. No data to push."
@@ -48,9 +48,10 @@ try {
                 @{
                     computerName = $row.'Computer Name'
                     backupStatus = $row.'PowerShell (Daily Backup Check) BackupStatus'
-                    fileAge = if ($row.'PowerShell (Daily Backup Check) FileAge') { 
+                    fileAge      = if ($row.'PowerShell (Daily Backup Check) FileAge') { 
                         [int]$row.'PowerShell (Daily Backup Check) FileAge' 
-                    } else { 
+                    }
+                    else { 
                         $null 
                     }
                     modifiedTime = $row.'PowerShell (Daily Backup Check) ModifiedTime'
@@ -70,7 +71,7 @@ try {
     # Make API request
     $headers = @{
         "Authorization" = "Bearer $ServiceKey"
-        "Content-Type" = "application/json"
+        "Content-Type"  = "application/json"
     }
     
     $response = Invoke-RestMethod -Uri $endpoint -Method Post -Headers $headers -Body $jsonBody -ErrorAction Stop
@@ -79,12 +80,14 @@ try {
         Write-Host "SUCCESS: $($response.message)" -ForegroundColor Green
         Write-Host "Ingestion ID: $($response.ingestionId)" -ForegroundColor Gray
         Write-Host "Records pushed: $($response.recordsCount)" -ForegroundColor Gray
-    } else {
+    }
+    else {
         Write-Error "API returned error: $($response.message)"
         exit 1
     }
     
-} catch {
+}
+catch {
     Write-Error "Error: $($_.Exception.Message)"
     
     # Try to extract more details if available

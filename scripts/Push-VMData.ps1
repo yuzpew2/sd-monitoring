@@ -22,8 +22,8 @@ param(
     [string]$Delimiter = ";"
 )
 
-# Validate CSV file exists
-if (-not (Test-Path $CsvPath)) {
+# Validate CSV file exists (use LiteralPath for special characters like [])
+if (-not (Test-Path -LiteralPath $CsvPath)) {
     Write-Error "CSV file not found: $CsvPath"
     exit 1
 }
@@ -31,8 +31,8 @@ if (-not (Test-Path $CsvPath)) {
 Write-Host "Reading CSV file: $CsvPath" -ForegroundColor Cyan
 
 try {
-    # Import CSV with semicolon delimiter
-    $csvData = Import-Csv -Path $CsvPath -Delimiter $Delimiter
+    # Import CSV with semicolon delimiter (use LiteralPath for special characters)
+    $csvData = Import-Csv -LiteralPath $CsvPath -Delimiter $Delimiter
     
     if ($csvData.Count -eq 0) {
         Write-Warning "CSV file is empty. No data to push."
